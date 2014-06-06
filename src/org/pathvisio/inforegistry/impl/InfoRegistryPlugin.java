@@ -158,7 +158,6 @@ ApplicationEventListener {
                                 {                   
                                 	model = (MutableComboBoxModel<String>)pluginList.getModel();
                                 	emptyJComboBox(pluginList);
-                                	model = addToComboBoxModel(model,"abc".toString());
                                     Iterator<IInfoProvider> ip = registry.registeredPlugins.iterator();
                                     while(ip.hasNext()) {
                                     	IInfoProvider ipo = ip.next();
