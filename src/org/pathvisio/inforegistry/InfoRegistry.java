@@ -30,7 +30,6 @@ import java.util.Set;
 public class InfoRegistry {
 
 	private static InfoRegistry registry;
-	
 	public Set<IInfoProvider> registeredPlugins;
 	
 	// Registry implements the Singelton design pattern 
@@ -43,6 +42,10 @@ public class InfoRegistry {
 		return registry;
 	}
 	
+	/**
+	 * Constructor that initializes registeredPlugins to a new
+	 * set to contain registered plugins.
+	 */
 	private InfoRegistry() {
 
 		if(registeredPlugins == null){
@@ -53,15 +56,21 @@ public class InfoRegistry {
 	}
 	
 	
-	
+	/**
+	 * To be used by plugins to register themselves with info provider
+	 * @param provider - Plugin to be registered
+	 */
 	public void registerInfoProvider(IInfoProvider provider) {
 
 		if (provider.getName() != null) {
 			registeredPlugins.add(provider);
-			//System.err.println(provider.getName());
 		}
 	}
 	
+	/**
+	 * To be used by plugins to unregister themselves with info provider
+	 * @param provider - Plugin to be unregistered
+	 */
 	public void unregisterInfoProvider(IInfoProvider provider) {
 
 		if(registeredPlugins.contains(provider)){

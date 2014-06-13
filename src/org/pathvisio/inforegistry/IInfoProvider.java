@@ -33,8 +33,28 @@ import org.pathvisio.core.model.DataNodeType;
  */
 public interface IInfoProvider {
 
+	/**
+	 * method to get the name of the registered plugin
+	 * @return name of the registered plugin
+	 */
 	public String getName();
+	
+	
+	/**
+	 * method to get the data node types that the registering plugin 
+	 * supports
+	 * @return set of data node types supported by the registered 
+	 * plugin
+	 */
 	public Set<DataNodeType> getDatanodeTypes();
+	
+	
+	/**
+	 * method to get additional information from the registered plugin
+	 * for a particular data node
+	 * @param xref - to provide id and datasource to the registered plugin 
+	 * @return additional information returned from the registered plugin
+	 */
 	public JComponent getInformation(Xref xref);
 	
 }
