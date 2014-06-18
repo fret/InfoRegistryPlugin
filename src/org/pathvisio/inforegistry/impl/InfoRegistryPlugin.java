@@ -33,7 +33,10 @@ import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.DataNodeType;
 
 import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -74,6 +77,12 @@ ApplicationEventListener {
 //	private int warning_flag;
 //	private String warning_message;
 //	private JLabel centerLabel;
+	private JPanel northPanel;
+	private JPanel centerPanel;
+	private JButton okButton;
+	private JButton cancelButton;
+	private JLabel errorMessage;
+	private getInformationWorker giw;
 
 	
 	@Override
@@ -110,15 +119,66 @@ ApplicationEventListener {
 		//acts like a container
 		sidePanel = new JPanel ();
 		sidePanel.setLayout(new BorderLayout());
-		sidePanel.add(new JLabel ("No node selected."), BorderLayout.CENTER);
+		
+		northPanel = new JPanel();
+		northPanel.setLayout(new GridBagLayout());
+		centerPanel = new JPanel();
+		
+		sidePanel.add(northPanel,BorderLayout.NORTH);
+		sidePanel.add(centerPanel,BorderLayout.CENTER);
+		
+		
+		
+		//sidePanel.add(new JLabel ("No node selected."), BorderLayout.CENTER);
 	//	warning_flag = 1;
 		
 	//	centerLabel = new JLabel();
 
 		//will contain all the registered plugins
+		
         pluginList = new JComboBox<String>();
+        model = (MutableComboBoxModel<String>)pluginList.getModel();
+        goButton = new JButton("Go");
+        cancelButton = new JButton("Cancel");
+        errorMessage = new JLabel("No item selected.");
+
+		
+		GridBagConstraints con = new GridBagConstraints();
+		
+		con.fill = GridBagConstraints.HORIZONTAL;
+		con.gridx = 0;
+		con.gridy = 0;
+		//con.weightx = 1;
+		con.gridwidth = 4;
+		//con.gridheight = 1;
+        northPanel.add(pluginList,con);
         
-        pluginList.addItemListener(new ItemListener() {
+		con.fill = GridBagConstraints.HORIZONTAL;
+		con.gridx = 0;
+		con.gridy = 1;
+		con.weightx = 0.5;
+		con.gridwidth = 2;
+		//con.gridheight = 1;
+        northPanel.add(goButton,con);
+        
+		con.fill = GridBagConstraints.HORIZONTAL;
+		con.gridx = 2;
+		con.gridy = 1;
+		con.weightx = 0.5;
+		con.gridwidth = 2;
+		//con.gridheight = 1;
+        northPanel.add(cancelButton,con);
+        
+		con.fill = GridBagConstraints.HORIZONTAL;
+		con.gridx = 0;
+		con.gridy = 2;
+		//con.weightx = 1;
+		con.gridwidth = 4;
+		//con.gridheight = 1;
+        northPanel.add(errorMessage,con);
+        
+        
+        /* pluginList.addItemListener(new ItemListener() {
         	
         	@Override
            public void itemStateChanged(ItemEvent e){
@@ -132,12 +192,11 @@ ApplicationEventListener {
                         	IInfoProvider ipo = ip.next();
                         	
                         	if( ipo.getName().equals(e.getItem().toString())){
-                       
-                        		getInformationWorker giw = new getInformationWorker(ipo, sidePanel, xref);
-                        		flag = 1;
-                        		giw.execute();
-                        		sidePanel.add(new JLabel ("Connecting to internet."));
                         		
+                        		displayMessage("Connecting to internet...");
+                        		getInformationWorker giw = new getInformationWorker(ipo, centerPanel, xref);
+                        		flag = 1;
+                        		giw.execute();        		
                         	}
                         	
                         }
@@ -153,38 +212,66 @@ ApplicationEventListener {
             }
         });
         
-        
+        */
         
         //sidePanel.add(pluginList, BorderLayout.NORTH);
         
         //goButton = new JButton("Go");
-        //goButton.addActionListener(new ActionListener() {
-        	//public void actionPerformed(ActionEvent e){
+        goButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e){
         		
         		//System.err.println("cliky");
+      
         		
-        		//if(warning_flag == 1){
+        		if(pluginList.getItemCount() != 0){
         			
-        			//displayMessage(warning_message);
-        		//}
-        		//else{
-                  /*  Iterator<IInfoProvider> ip = registry.registeredPlugins.iterator();
+        			
+        		
+        		
+                    Iterator<IInfoProvider> ip = registry.registeredPlugins.iterator();
                     while(ip.hasNext()) {
                     	IInfoProvider ipo = ip.next();
                     	
                     	if( ipo.getName().equals(pluginList.getSelectedItem().toString())){
-                   
-                    		getInformationWorker giw = new getInformationWorker(ipo, sidePanel, xref);
-                    		giw.execute();
+                    		
+                    		if(giw!=null && !giw.isDone()){
+                    			giw.cancel(true);
+                    		}
+                    			displayMessage("Connecting to the plugin...");
+                        		giw = new getInformationWorker(ipo, centerPanel, errorMessage, xref);
+                        		giw.execute();
                     		//sidePanel.add(new JLabel ("Connecting to internet."));
                     		
                     	}
                     	
                     }
            		}
-        	}
-        });
-        */
+        		else {
+        			displayMessage("No plugin available.");
+        		}
+        	}}
+        );
+        
+        
+        cancelButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e){
+				
+        		if(giw!=null && !giw.isDone()){
+        			giw.cancel(true);
+        			displayMessage("Query cancelled.");
+        		}
+        		else{
+        			displayMessage("No query in progress.");
+        		}
+				
+			}
+			
+        }
+        );
+        
+        
         //sidePanel.add(goButton,BorderLayout.SOUTH);
        
         JTabbedPane sidebarTabbedPane = desktop.getSideBarTabbedPane();
@@ -213,6 +300,7 @@ ApplicationEventListener {
         	multiSelection(e);
         	break;
         case SelectionEvent.SELECTION_CLEARED:
+        	emptyJComboBox(pluginList);
         	displayMessage("No node selected.");
         	break;
         }
@@ -279,8 +367,7 @@ ApplicationEventListener {
             if(pe.getObjectType()==ObjectType.DATANODE)    
             {   
             	if(isAnnotated(pe)){
-            	xref = pe.getXref();
-            	model = (MutableComboBoxModel<String>)pluginList.getModel();
+            	xref = pe.getXref();            	
             	emptyJComboBox(pluginList);
                 Iterator<IInfoProvider> ip = registry.registeredPlugins.iterator();
                 while(ip.hasNext()) {
@@ -313,18 +400,13 @@ ApplicationEventListener {
             		break;
             		}
         		}
-            	
+            errorMessage.setText(null);	
         	pluginList.setModel(model);
-        	sidePanel.removeAll();
-        	sidePanel.add(pluginList,BorderLayout.NORTH);
-        	sidePanel.add(goButton, BorderLayout.SOUTH);
-        	
-        	
         	sidePanel.revalidate();
         	sidePanel.repaint();
             	}
             	else{
-            		//warning_flag = 1;
+            		emptyJComboBox(pluginList);
             		displayMessage("Warning: Data node not annotated.");
             	}
 
@@ -340,8 +422,7 @@ ApplicationEventListener {
 	 */
 	private void displayMessage(String s){
 		
-		sidePanel.removeAll();
-		sidePanel.add(new JLabel(s));
+		errorMessage.setText(s);
        	sidePanel.revalidate();
        	sidePanel.repaint();               
 	}
@@ -359,10 +440,12 @@ ApplicationEventListener {
         }
         else if(e.selection.size() == 0) {
         	//warning_flag = 1;
+        	emptyJComboBox(pluginList);
         	displayMessage("No node selected.");
         }
         else{
         	//warning_flag = 1;
+        	emptyJComboBox(pluginList);
         	displayMessage("Warning: Multiple Elements Selected.");
         }
 	}

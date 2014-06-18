@@ -2,9 +2,11 @@ package org.pathvisio.inforegistry.impl;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
@@ -16,12 +18,14 @@ public class getInformationWorker extends SwingWorker<JComponent, Void> {
 	  	
 	  
 	  private final IInfoProvider ipo;
-	  private final JPanel sidePanel;
+	  private final JPanel centerPanel;
+	  private final JLabel errorMessage;
 	  private final Xref xref;
 	  
-	  public getInformationWorker(final IInfoProvider ipo, final JPanel sidePanel, final Xref xref){
+	  public getInformationWorker(final IInfoProvider ipo, final JPanel centerPanel, final JLabel errorMessage, final Xref xref){
 		  this.ipo = ipo;
-		  this.sidePanel = sidePanel;
+		  this.centerPanel = centerPanel;
+		  this.errorMessage = errorMessage;
 		  this.xref = xref;
 	  }
 	  
@@ -34,9 +38,12 @@ public class getInformationWorker extends SwingWorker<JComponent, Void> {
 		  
 		  try {
 			JComponent jc = get();
-			sidePanel.add(jc);
-			sidePanel.revalidate();
-			sidePanel.repaint();
+			errorMessage.setText(null);
+			centerPanel.removeAll();
+			centerPanel.add(new JLabel("Results:"));
+			centerPanel.add(jc);
+			centerPanel.revalidate();
+			centerPanel.repaint();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -44,5 +51,7 @@ public class getInformationWorker extends SwingWorker<JComponent, Void> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		  catch (CancellationException e){
+		  }
 	  }
 }
