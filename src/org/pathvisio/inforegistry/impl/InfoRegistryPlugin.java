@@ -142,7 +142,8 @@ ApplicationEventListener {
         cancelButton = new JButton("Cancel");
         errorMessage = new JLabel("No item selected.");
 
-		
+		goButton.setEnabled(false);
+		cancelButton.setEnabled(false);
 		GridBagConstraints con = new GridBagConstraints();
 		
 		con.fill = GridBagConstraints.HORIZONTAL;
@@ -248,6 +249,8 @@ ApplicationEventListener {
                     }
            		}
         		else {
+   			
+        			
         			displayMessage("No plugin available.");
         		}
         	}}
@@ -297,10 +300,14 @@ ApplicationEventListener {
         	multiSelection(e);
         	break;
         case SelectionEvent.OBJECT_REMOVED:
+        	goButton.setEnabled(false);
+        	cancelButton.setEnabled(false);
         	multiSelection(e);
         	break;
         case SelectionEvent.SELECTION_CLEARED:
-        	emptyJComboBox(pluginList);
+        	goButton.setEnabled(false);
+        	cancelButton.setEnabled(false);
+        	emptyJComboBox(pluginList);        	
         	displayMessage("No node selected.");
         	break;
         }
@@ -367,6 +374,8 @@ ApplicationEventListener {
             if(pe.getObjectType()==ObjectType.DATANODE)    
             {   
             	if(isAnnotated(pe)){
+            		goButton.setEnabled(true);
+                	cancelButton.setEnabled(true);
             	xref = pe.getXref();            	
             	emptyJComboBox(pluginList);
                 Iterator<IInfoProvider> ip = registry.registeredPlugins.iterator();
@@ -410,7 +419,8 @@ ApplicationEventListener {
             		displayMessage("Warning: Data node not annotated.");
             	}
 
-        }      
+        }   
+            
 }
 
 
@@ -434,6 +444,7 @@ ApplicationEventListener {
 	 */
 	private void multiSelection(SelectionEvent e){
         if(e.selection.size() == 1){
+        	
         	//warning_flag = 0;
         	Iterator<VPathwayElement> it = e.selection.iterator();
         	sidePanelDisplayManager(it.next());
@@ -441,11 +452,15 @@ ApplicationEventListener {
         else if(e.selection.size() == 0) {
         	//warning_flag = 1;
         	emptyJComboBox(pluginList);
+        	goButton.setEnabled(false);
+        	cancelButton.setEnabled(false);
         	displayMessage("No node selected.");
         }
         else{
         	//warning_flag = 1;
         	emptyJComboBox(pluginList);
+        	goButton.setEnabled(false);
+        	cancelButton.setEnabled(false);
         	displayMessage("Warning: Multiple Elements Selected.");
         }
 	}
