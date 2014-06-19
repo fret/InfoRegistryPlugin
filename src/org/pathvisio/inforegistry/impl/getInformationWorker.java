@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
+import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -39,8 +40,9 @@ public class getInformationWorker extends SwingWorker<JComponent, Void> {
 		  try {
 			JComponent jc = get();
 			errorMessage.setText(null);
+			centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 			centerPanel.removeAll();
-			centerPanel.add(new JLabel("Results:"));
+			//centerPanel.add(new JLabel("Results:"));
 			centerPanel.add(jc);
 			centerPanel.revalidate();
 			centerPanel.repaint();
