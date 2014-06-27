@@ -83,6 +83,7 @@ ApplicationEventListener {
 	private JButton cancelButton;
 	private JLabel errorMessage;
 	private getInformationWorker giw;
+	private Object lastSelected;
 
 	
 	@Override
@@ -236,6 +237,7 @@ ApplicationEventListener {
                     	
                     	if( ipo.getName().equals(pluginList.getSelectedItem().toString())){
                     		
+                    		lastSelected = pluginList.getSelectedItem();
                     		if(giw!=null && !giw.isDone()){
                     			giw.cancel(true);
                     		}
@@ -411,6 +413,9 @@ ApplicationEventListener {
         		}
             errorMessage.setText(null);	
         	pluginList.setModel(model);
+        	if(lastSelected != null){
+        	pluginList.setSelectedItem(lastSelected);
+        	}
         	sidePanel.revalidate();
         	sidePanel.repaint();
             	}
