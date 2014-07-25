@@ -51,8 +51,6 @@ public class InfoRegistry {
 		if(registeredPlugins == null){
 			registeredPlugins = new HashSet<IInfoProvider>();
 		}
-
-		
 	}
 	
 	

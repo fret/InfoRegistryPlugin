@@ -122,13 +122,6 @@ ApplicationEventListener {
 		
 		sidePanel.add(northPanel,BorderLayout.NORTH);
 		sidePanel.add(centerPanel,BorderLayout.CENTER);
-		
-		
-		
-		//sidePanel.add(new JLabel ("No node selected."), BorderLayout.CENTER);
-	//	warning_flag = 1;
-		
-	//	centerLabel = new JLabel();
 
 		//will contain all the registered plugins
 		
@@ -173,59 +166,17 @@ ApplicationEventListener {
 		con.gridwidth = 4;
 		//con.gridheight = 1;
         northPanel.add(errorMessage,con);
-        
-        
-        /* pluginList.addItemListener(new ItemListener() {
-        	
-        	@Override
-           public void itemStateChanged(ItemEvent e){
-      
-        		
-            	{	
-                	if (e.getStateChange() == ItemEvent.SELECTED){
-                		int flag = 0;
-                        Iterator<IInfoProvider> ip = registry.registeredPlugins.iterator();
-                        while(ip.hasNext()) {
-                        	IInfoProvider ipo = ip.next();
-                        	
-                        	if( ipo.getName().equals(e.getItem().toString())){
-                        		
-                        		displayMessage("Connecting to internet...");
-                        		getInformationWorker giw = new getInformationWorker(ipo, centerPanel, xref);
-                        		flag = 1;
-                        		giw.execute();        		
-                        	}
-                        	
-                        }
-                        
-                        if(flag==0){
-                    		if(c != null)
-                        		sidePanel.remove(c);
-                        		sidePanel.revalidate();
-                        		sidePanel.repaint();
-                        }
-                	}
-                    }
-            }
-        });
-        
-        */
-        
-        //sidePanel.add(pluginList, BorderLayout.NORTH);
-        
+                
         //goButton = new JButton("Go");
         goButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e){
-        		
+        		centerPanel.removeAll();
         		//System.err.println("cliky");
       
         		
         		if(pluginList.getItemCount() != 0){
-        			
-        			
-        		
-        		
+    
                     Iterator<IInfoProvider> ip = registry.registeredPlugins.iterator();
                     while(ip.hasNext()) {
                     	IInfoProvider ipo = ip.next();
@@ -306,6 +257,7 @@ ApplicationEventListener {
         	cancelButton.setEnabled(false);
         	emptyJComboBox(pluginList);        	
         	displayMessage("No node selected.");
+        	centerPanel.removeAll();
         	break;
         }
        
