@@ -16,38 +16,33 @@
 //
 package org.pathvisio.inforegistry.impl;
 
-import java.util.Iterator;
-
-import org.bridgedb.Xref;
-import org.pathvisio.core.ApplicationEvent;
-import org.pathvisio.core.view.VPathway;
-import org.pathvisio.core.Engine.ApplicationEventListener;
-import org.pathvisio.core.model.PathwayElement;
-import org.pathvisio.core.model.PathwayElementEvent;
-import org.pathvisio.core.model.PathwayElementListener;
-import org.pathvisio.core.model.StaticProperty;
-import org.pathvisio.core.model.StaticPropertyType;
-import org.pathvisio.core.view.Graphics;
-import org.pathvisio.core.view.VPathwayElement;
-import org.pathvisio.core.model.ObjectType;
-import org.pathvisio.core.model.DataNodeType;
-
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Iterator;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.MutableComboBoxModel;
 
-import java.awt.event.*;
-
-import javax.swing.*;
-
+import org.bridgedb.Xref;
+import org.pathvisio.core.ApplicationEvent;
+import org.pathvisio.core.Engine.ApplicationEventListener;
+import org.pathvisio.core.model.DataNodeType;
+import org.pathvisio.core.model.ObjectType;
+import org.pathvisio.core.model.PathwayElement;
+import org.pathvisio.core.model.PathwayElementEvent;
+import org.pathvisio.core.model.PathwayElementListener;
+import org.pathvisio.core.view.Graphics;
 import org.pathvisio.core.view.SelectionBox.SelectionEvent;
 import org.pathvisio.core.view.SelectionBox.SelectionListener;
+import org.pathvisio.core.view.VPathway;
+import org.pathvisio.core.view.VPathwayElement;
 import org.pathvisio.desktop.PvDesktop;
 import org.pathvisio.desktop.plugin.Plugin;
 import org.pathvisio.inforegistry.IInfoProvider;
@@ -69,17 +64,17 @@ ApplicationEventListener {
 	private InfoRegistry registry;
 	private PvDesktop desktop;
 	private JPanel sidePanel;
-	private JComboBox<String> pluginList;
-	private JComponent c = null;
+	private JComboBox pluginList;
+//	private JComponent c = null;
 	private JButton goButton;
-	private MutableComboBoxModel<String> model;
+	private MutableComboBoxModel model;
 	private Xref xref;
 //	private int warning_flag;
 //	private String warning_message;
 //	private JLabel centerLabel;
 	private JPanel northPanel;
 	private JPanel centerPanel;
-	private JButton okButton;
+//	private JButton okButton;
 	private JButton cancelButton;
 	private JLabel errorMessage;
 	private getInformationWorker giw;
@@ -137,8 +132,8 @@ ApplicationEventListener {
 
 		//will contain all the registered plugins
 		
-        pluginList = new JComboBox<String>();
-        model = (MutableComboBoxModel<String>)pluginList.getModel();
+        pluginList = new JComboBox();
+        model = (MutableComboBoxModel)pluginList.getModel();
         goButton = new JButton("Go");
         cancelButton = new JButton("Cancel");
         errorMessage = new JLabel("No item selected.");
@@ -340,7 +335,7 @@ ApplicationEventListener {
 	 * @param str - item to be added
 	 * @return - modified model with the new item added(if not present before)
 	 */
-	private MutableComboBoxModel<String> addToComboBoxModel(MutableComboBoxModel<String> model, String str ){
+	private MutableComboBoxModel addToComboBoxModel(MutableComboBoxModel model, String str ){
 		int index,flag = 0;
 		for(index=0; index < model.getSize(); index++){
 			
@@ -360,7 +355,7 @@ ApplicationEventListener {
 	 * removes all the items from the drop down box
 	 * @param jcb - drop down box to be emptied
 	 */
-	private void emptyJComboBox(JComboBox<String> jcb){
+	private void emptyJComboBox(JComboBox jcb){
 		pluginList.removeAllItems();
 	}
 	
@@ -373,62 +368,55 @@ ApplicationEventListener {
 
         if(o instanceof Graphics) {
             PathwayElement pe = ((Graphics)o).getPathwayElement();
-            if(pe.getObjectType()==ObjectType.DATANODE)    
-            {   
-            	if(isAnnotated(pe)){
+            if(pe.getObjectType()==ObjectType.DATANODE) {   
+            	if(isAnnotated(pe)) {
             		goButton.setEnabled(true);
                 	cancelButton.setEnabled(true);
-            	xref = pe.getXref();            	
-            	emptyJComboBox(pluginList);
-                Iterator<IInfoProvider> ip = registry.registeredPlugins.iterator();
-                while(ip.hasNext()) {
-                	IInfoProvider ipo = ip.next();
-                	
-            		switch(pe.getDataNodeType()){
-            		case"Protein": if(ipo.getDatanodeTypes().contains(DataNodeType.PROTEIN)){
-            					   model = addToComboBoxModel(model, ipo.getName()); 
+                	xref = pe.getXref();            	
+                	emptyJComboBox(pluginList);
+                	Iterator<IInfoProvider> ip = registry.registeredPlugins.iterator();
+                	while(ip.hasNext()) {
+	                	IInfoProvider ipo = ip.next();
+	                	
+	                	if(pe.getDataNodeType().equals("Protein")) {
+	                		if(ipo.getDatanodeTypes().contains(DataNodeType.PROTEIN)){
+	                			model = addToComboBoxModel(model, ipo.getName()); 
+	                		}
+	                	} else if (pe.getDataNodeType().equals("Rna")) {
+	                		if(ipo.getDatanodeTypes().contains(DataNodeType.RNA)){
+	                			model = addToComboBoxModel(model, ipo.getName());
+	                		}
+	            		} else if (pe.getDataNodeType().equals("GeneProduct")) {
+	            			if(ipo.getDatanodeTypes().contains(DataNodeType.GENEPRODUCT)){
+	            				model = addToComboBoxModel(model, ipo.getName());
+	            			}
+	             		} else if (pe.getDataNodeType().equals("Metabolite")) {
+		            		if(ipo.getDatanodeTypes().contains(DataNodeType.METABOLITE)) {
+		            			model = addToComboBoxModel(model, ipo.getName());
+		            		}
+	              		} else if (pe.getDataNodeType().equals("Pathway")) {
+	              			if(ipo.getDatanodeTypes().contains(DataNodeType.PATHWAY)){
+	    					   model = addToComboBoxModel(model, ipo.getName());
+	              			}
+	              		}  else if (pe.getDataNodeType().equals("Unknown")) {
+	              			if(ipo.getDatanodeTypes().contains(DataNodeType.UNKOWN)){
+	    					   model = addToComboBoxModel(model, ipo.getName());
+	              			}
+	              		}
                 	}
-            		break;
-            		case"Rna": if(ipo.getDatanodeTypes().contains(DataNodeType.RNA)){
- 					   model = addToComboBoxModel(model, ipo.getName());
-            		}
-            		break;
-            		case"GeneProduct": if(ipo.getDatanodeTypes().contains(DataNodeType.GENEPRODUCT)){
-  					   model = addToComboBoxModel(model, ipo.getName());
-             		}
-            		break;
-            		case"Metabolite": if(ipo.getDatanodeTypes().contains(DataNodeType.METABOLITE )){
-   					   model = addToComboBoxModel(model, ipo.getName());
-              		}
-            		break;
-            		case"Pathway": if(ipo.getDatanodeTypes().contains(DataNodeType.PATHWAY  )){
-    					   model = addToComboBoxModel(model, ipo.getName());
-               		}
-            		break;
-            		case"Unknown": if(ipo.getDatanodeTypes().contains(DataNodeType.UNKOWN  )){
-    					   model = addToComboBoxModel(model, ipo.getName());
-               		}
-            		break;
-            		}
-        		}
-            errorMessage.setText(null);	
-        	pluginList.setModel(model);
-        	if(lastSelected != null){
-        	pluginList.setSelectedItem(lastSelected);
-        	}
-        	sidePanel.revalidate();
-        	sidePanel.repaint();
-            	}
-            	else{
+                	errorMessage.setText(null);	
+                	pluginList.setModel(model);
+                	if(lastSelected != null){
+                		pluginList.setSelectedItem(lastSelected);
+                	}
+                	sidePanel.revalidate();
+                	sidePanel.repaint();
+            	} else{
             		emptyJComboBox(pluginList);
             		displayMessage("Warning: Data node not annotated.");
             	}
-
-        }   
-            
-}
-
-
+            }   
+        }
 	}
 	
 	/**

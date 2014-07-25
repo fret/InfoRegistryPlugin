@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project name="org.pathvisio.inforegistry" default="install" basedir=".">
 
-  <property name="pathvisio.dir" value="../../../pathvisio"/>
+  <property name="pathvisio.dir" value="../../pv-trunk"/>
 	<property name="bundle.dest" value="dist"/>
 	<property name="jar.name" value="org.pathvisio.inforegistry.jar"/>
 
@@ -39,8 +39,7 @@
 		<javac srcdir="src"
 			   includes="**"
 			   destdir="build"
-			   debug="${debug.mode}"
-			   source="7">
+			   debug="${debug.mode}">
        <classpath refid="project.class.path"/>
 		</javac>
 	</target>

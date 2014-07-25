@@ -1,7 +1,5 @@
 package org.pathvisio.inforegistry.impl;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
