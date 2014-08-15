@@ -72,7 +72,7 @@ public class InfoRegistry {
 	public void unregisterInfoProvider(IInfoProvider provider) {
 
 		if(registeredPlugins.contains(provider)){
-		registeredPlugins.remove(provider);
+			registeredPlugins.remove(provider);
 		}
 	}	
 }

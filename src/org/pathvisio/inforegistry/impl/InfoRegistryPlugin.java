@@ -17,27 +17,24 @@
 package org.pathvisio.inforegistry.impl;
 
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.MutableComboBoxModel;
 
-import org.bridgedb.Xref;
 import org.pathvisio.core.ApplicationEvent;
 import org.pathvisio.core.Engine.ApplicationEventListener;
 import org.pathvisio.core.model.DataNodeType;
 import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.PathwayElement;
-import org.pathvisio.core.model.PathwayElementEvent;
-import org.pathvisio.core.model.PathwayElementListener;
 import org.pathvisio.core.view.Graphics;
 import org.pathvisio.core.view.SelectionBox.SelectionEvent;
 import org.pathvisio.core.view.SelectionBox.SelectionListener;
@@ -47,6 +44,10 @@ import org.pathvisio.desktop.PvDesktop;
 import org.pathvisio.desktop.plugin.Plugin;
 import org.pathvisio.inforegistry.IInfoProvider;
 import org.pathvisio.inforegistry.InfoRegistry;
+
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * 
@@ -58,32 +59,18 @@ import org.pathvisio.inforegistry.InfoRegistry;
  * @author rohansaxena
  *
  */
-public class InfoRegistryPlugin extends JPanel implements Plugin, SelectionListener,PathwayElementListener,
-ApplicationEventListener {
+public class InfoRegistryPlugin extends JPanel implements Plugin, SelectionListener, ApplicationEventListener {
 
 	private InfoRegistry registry;
 	private PvDesktop desktop;
 	private JPanel sidePanel;
 	private JComboBox pluginList;
-//	private JComponent c = null;
-	private JButton goButton;
-	private MutableComboBoxModel model;
-	private Xref xref;
-//	private int warning_flag;
-//	private String warning_message;
-//	private JLabel centerLabel;
-	private JPanel northPanel;
 	private JPanel centerPanel;
-//	private JButton okButton;
-	private JButton cancelButton;
-	private JLabel errorMessage;
 	private getInformationWorker giw;
 	private Object lastSelected;
 
-	
 	@Override
 	public void init(PvDesktop desktop) {
-		
 		registry = InfoRegistry.getInfoRegistry();
 		this.desktop = desktop;
 		
@@ -93,19 +80,10 @@ ApplicationEventListener {
 		
 		addSidePanel();
 	}
-
 	
 	public InfoRegistryPlugin(){
-
 		super(new BorderLayout());
-
 	}
-	
-
-  /*  public JPanel getSidePanel() {
-    	return sidePanel;
-    }
-    */
 	
 	/**
 	 * In this method a new tabbed pane called info is added. 
@@ -115,115 +93,10 @@ ApplicationEventListener {
 		//acts like a container
 		sidePanel = new JPanel ();
 		sidePanel.setLayout(new BorderLayout());
-		
-		northPanel = new JPanel();
-		northPanel.setLayout(new GridBagLayout());
+		displayMessage("No pathway element selected.");
 		centerPanel = new JPanel();
 		
-		sidePanel.add(northPanel,BorderLayout.NORTH);
 		sidePanel.add(centerPanel,BorderLayout.CENTER);
-
-		//will contain all the registered plugins
-		
-        pluginList = new JComboBox();
-        model = (MutableComboBoxModel)pluginList.getModel();
-        goButton = new JButton("Go");
-        cancelButton = new JButton("Cancel");
-        errorMessage = new JLabel("No item selected.");
-
-		goButton.setEnabled(false);
-		cancelButton.setEnabled(false);
-		GridBagConstraints con = new GridBagConstraints();
-		
-		con.fill = GridBagConstraints.HORIZONTAL;
-		con.gridx = 0;
-		con.gridy = 0;
-		//con.weightx = 1;
-		con.gridwidth = 4;
-		//con.gridheight = 1;
-        northPanel.add(pluginList,con);
-        
-		con.fill = GridBagConstraints.HORIZONTAL;
-		con.gridx = 0;
-		con.gridy = 1;
-		con.weightx = 0.5;
-		con.gridwidth = 2;
-		//con.gridheight = 1;
-        northPanel.add(goButton,con);
-        
-		con.fill = GridBagConstraints.HORIZONTAL;
-		con.gridx = 2;
-		con.gridy = 1;
-		con.weightx = 0.5;
-		con.gridwidth = 2;
-		//con.gridheight = 1;
-        northPanel.add(cancelButton,con);
-        
-		con.fill = GridBagConstraints.HORIZONTAL;
-		con.gridx = 0;
-		con.gridy = 2;
-		//con.weightx = 1;
-		con.gridwidth = 4;
-		//con.gridheight = 1;
-        northPanel.add(errorMessage,con);
-                
-        //goButton = new JButton("Go");
-        goButton.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e){
-        		centerPanel.removeAll();
-        		//System.err.println("cliky");
-      
-        		
-        		if(pluginList.getItemCount() != 0){
-    
-                    Iterator<IInfoProvider> ip = registry.registeredPlugins.iterator();
-                    while(ip.hasNext()) {
-                    	IInfoProvider ipo = ip.next();
-                    	
-                    	if( ipo.getName().equals(pluginList.getSelectedItem().toString())){
-                    		
-                    		lastSelected = pluginList.getSelectedItem();
-                    		if(giw!=null && !giw.isDone()){
-                    			giw.cancel(true);
-                    		}
-                    			displayMessage("Connecting to the plugin...");
-                        		giw = new getInformationWorker(ipo, centerPanel, errorMessage, xref);
-                        		giw.execute();
-                    		//sidePanel.add(new JLabel ("Connecting to internet."));
-                    		
-                    	}
-                    	
-                    }
-           		}
-        		else {
-   			
-        			
-        			displayMessage("No plugin available.");
-        		}
-        	}}
-        );
-        
-        
-        cancelButton.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e){
-				
-        		if(giw!=null && !giw.isDone()){
-        			giw.cancel(true);
-        			displayMessage("Query cancelled.");
-        		}
-        		else{
-        			displayMessage("No query in progress.");
-        		}
-				
-			}
-			
-        }
-        );
-        
-        
-        //sidePanel.add(goButton,BorderLayout.SOUTH);
        
         JTabbedPane sidebarTabbedPane = desktop.getSideBarTabbedPane();
         sidebarTabbedPane.add("Info", sidePanel);
@@ -232,7 +105,6 @@ ApplicationEventListener {
 	@Override
 	public void done() {		
 		desktop.getSideBarTabbedPane().remove(sidePanel);
-		// TODO Auto-generated method stub
 	}
 
 	/**
@@ -241,74 +113,34 @@ ApplicationEventListener {
 	 * Displays warnings in unusual conditions.
 	 */
 	public void selectionEvent(SelectionEvent e) {
-		// TODO Auto-generated method stub
-		
         switch(e.type) {
         case SelectionEvent.OBJECT_ADDED:
+        	centerPanel.removeAll();
         	multiSelection(e);
         	break;
         case SelectionEvent.OBJECT_REMOVED:
-        	goButton.setEnabled(false);
-        	cancelButton.setEnabled(false);
+        	centerPanel.removeAll();
         	multiSelection(e);
         	break;
         case SelectionEvent.SELECTION_CLEARED:
-        	goButton.setEnabled(false);
-        	cancelButton.setEnabled(false);
-        	emptyJComboBox(pluginList);        	
-        	displayMessage("No node selected.");
         	centerPanel.removeAll();
+        	displayMessage("No node selected.");
         	break;
         }
        
-}
-	
-	public void gmmlObjectModified(PathwayElementEvent e) {
-
 	}
 	
-	public void applicationEvent(ApplicationEvent e)
-	{
-		switch(e.getType())
-		{
+	public void applicationEvent(ApplicationEvent e) {
+		switch(e.getType()) {
 		case VPATHWAY_CREATED:
 			((VPathway)e.getSource()).addSelectionListener(this);
 			break;
 		case VPATHWAY_DISPOSED:
 			((VPathway)e.getSource()).removeSelectionListener(this);
-
+			break;
+		default:
 			break;
 		}
-	}
-	
-	/**
-	 * adds a new item to the model of drop down box if not present before.
-	 * @param model - model to be modified
-	 * @param str - item to be added
-	 * @return - modified model with the new item added(if not present before)
-	 */
-	private MutableComboBoxModel addToComboBoxModel(MutableComboBoxModel model, String str ){
-		int index,flag = 0;
-		for(index=0; index < model.getSize(); index++){
-			
-			if(model.getElementAt(index).equals(str)){
-				flag = 1;
-				break;
-			}
-		}
-		if(flag == 1)
-			return model;
-		else{
-			model.addElement(str);
-			return model;
-	}
-}
-	/**
-	 * removes all the items from the drop down box
-	 * @param jcb - drop down box to be emptied
-	 */
-	private void emptyJComboBox(JComboBox jcb){
-		pluginList.removeAllItems();
 	}
 	
 	/**
@@ -317,67 +149,143 @@ ApplicationEventListener {
 	 * @param o - currently selected pathway element 
 	 */
 	private void sidePanelDisplayManager(VPathwayElement o){
-
         if(o instanceof Graphics) {
             PathwayElement pe = ((Graphics)o).getPathwayElement();
-            if(pe.getObjectType()==ObjectType.DATANODE) {   
+            if(pe.getObjectType() == ObjectType.DATANODE) {   
             	if(isAnnotated(pe)) {
-            		goButton.setEnabled(true);
-                	cancelButton.setEnabled(true);
-                	xref = pe.getXref();            	
-                	emptyJComboBox(pluginList);
-                	Iterator<IInfoProvider> ip = registry.registeredPlugins.iterator();
-                	while(ip.hasNext()) {
-	                	IInfoProvider ipo = ip.next();
-	                	
-	                	if(pe.getDataNodeType().equals("Protein")) {
-	                		if(ipo.getDatanodeTypes().contains(DataNodeType.PROTEIN)){
-	                			model = addToComboBoxModel(model, ipo.getName()); 
-	                		}
-	                	} else if (pe.getDataNodeType().equals("Rna")) {
-	                		if(ipo.getDatanodeTypes().contains(DataNodeType.RNA)){
-	                			model = addToComboBoxModel(model, ipo.getName());
-	                		}
-	            		} else if (pe.getDataNodeType().equals("GeneProduct")) {
-	            			if(ipo.getDatanodeTypes().contains(DataNodeType.GENEPRODUCT)){
-	            				model = addToComboBoxModel(model, ipo.getName());
-	            			}
-	             		} else if (pe.getDataNodeType().equals("Metabolite")) {
-		            		if(ipo.getDatanodeTypes().contains(DataNodeType.METABOLITE)) {
-		            			model = addToComboBoxModel(model, ipo.getName());
-		            		}
-	              		} else if (pe.getDataNodeType().equals("Pathway")) {
-	              			if(ipo.getDatanodeTypes().contains(DataNodeType.PATHWAY)){
-	    					   model = addToComboBoxModel(model, ipo.getName());
-	              			}
-	              		}  else if (pe.getDataNodeType().equals("Unknown")) {
-	              			if(ipo.getDatanodeTypes().contains(DataNodeType.UNKOWN)){
-	    					   model = addToComboBoxModel(model, ipo.getName());
-	              			}
-	              		}
-                	}
-                	errorMessage.setText(null);	
-                	pluginList.setModel(model);
-                	if(lastSelected != null){
-                		pluginList.setSelectedItem(lastSelected);
-                	}
-                	sidePanel.revalidate();
-                	sidePanel.repaint();
+            		List<String> provider = getProvider(pe);
+            		if(provider.size() == 0) {
+            			displayMessage("<html>No provider available for this data node type.<br/>Check the plugin repository for available plugins.</html>");
+            		} else {
+            			validElementSelected(pe, provider);
+            		}
             	} else{
-            		emptyJComboBox(pluginList);
-            		displayMessage("Warning: Data node not annotated.");
+            		displayMessage("<html>Warning: Data node is not annotated.<br/>Please provide an identifier and database.</html>");
             	}
             }   
         }
+	}
+	
+	private List<String> getProvider(PathwayElement element) {
+		Iterator<IInfoProvider> ip = registry.registeredPlugins.iterator();
+		List<String> provider = new ArrayList<String>();
+		String type = element.getDataNodeType();
+		while(ip.hasNext()) {
+        	IInfoProvider ipo = ip.next();
+        	String name = ipo.getName();
+        	boolean add = false;
+        	if(type.equals("Protein") && ipo.getDatanodeTypes().contains(DataNodeType.PROTEIN)) {
+        		add = true;
+        	} else if (type.equals("Rna") && ipo.getDatanodeTypes().contains(DataNodeType.RNA)) {
+        		add = true;
+    		} else if (type.equals("GeneProduct") && ipo.getDatanodeTypes().contains(DataNodeType.GENEPRODUCT)) {
+    			add = true;
+     		} else if (type.equals("Metabolite") && ipo.getDatanodeTypes().contains(DataNodeType.METABOLITE)) {
+        		add = true;
+      		} else if (type.equals("Pathway") && ipo.getDatanodeTypes().contains(DataNodeType.PATHWAY)) {
+      			add = true;
+      		}
+        	if(add) {
+        		if(!provider.contains(name)) provider.add(name);
+        	}
+    	}
+		Collections.sort(provider);
+		return provider;
+	}
+	
+	private JComboBox fillDropDown(String type, List<String> provider) {
+		pluginList = new JComboBox();
+    	for(String s : provider) {
+    		pluginList.addItem(s);
+    	}
+
+    	if(lastSelected != null){
+    		pluginList.setSelectedItem(lastSelected);
+    	}
+    	return pluginList;
+	}
+	
+	private void validElementSelected(final PathwayElement pe, List<String> provider) {
+		sidePanel.removeAll();
+		CellConstraints cc = new CellConstraints();
+	    
+		final JComboBox pluginList = fillDropDown(pe.getDataNodeType(), provider);
+		
+	    FormLayout layout = new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,pref,5dlu,pref,15dlu");
+	    PanelBuilder builder = new PanelBuilder(layout);
+	     
+	    JLabel label = new JLabel("Please select a provider:");
+	    builder.add(label, cc.xy(2,2));
+	    builder.add(pluginList, cc.xy(2, 4));
+	    
+	    JButton goButton = new JButton("Go");
+	    JButton cancelButton = new JButton("Cancel");
+
+        goButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e){
+        		centerPanel.removeAll();
+        		if(pluginList.getItemCount() != 0) {
+                    Iterator<IInfoProvider> ip = registry.registeredPlugins.iterator();
+                    while(ip.hasNext()) {
+                    	IInfoProvider ipo = ip.next();
+                    	
+                    	if( ipo.getName().equals(pluginList.getSelectedItem().toString())) {
+                    		lastSelected = pluginList.getSelectedItem();
+                    		if(giw!=null && !giw.isDone()){
+                    			giw.cancel(true);
+                    		}
+                    		sidePanel.add(centerPanel, BorderLayout.CENTER);
+                        	giw = new getInformationWorker(ipo, centerPanel, pe.getXref());
+                        	giw.execute();
+                    	}
+                    }
+           		} else {
+        			displayMessage("No plugin available.");
+        		}
+        	}}
+        );
+        
+        
+        cancelButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e){
+        		if(giw!=null && !giw.isDone()){
+        			giw.cancel(true);
+        			displayMessage("Query cancelled.");
+        		} else {
+        			displayMessage("No query in progress.");
+        		}
+        	}
+        });
+        
+        JPanel panel = new JPanel();
+        panel.add(goButton);
+        panel.add(cancelButton);
+        
+        builder.add(panel, cc.xy(2, 6));
+        
+	    builder.addSeparator("", cc.xyw(2, 7, 2));
+	    sidePanel.add(builder.getPanel(), BorderLayout.NORTH);
+	    sidePanel.revalidate();
+    	sidePanel.repaint();
 	}
 	
 	/**
 	 * used to display a message in the info tabbed pane
 	 * @param s - Message to be displayed
 	 */
-	private void displayMessage(String s){
+	private void displayMessage(String s) {
+		sidePanel.removeAll();
+		CellConstraints cc = new CellConstraints();
 		
-		errorMessage.setText(s);
+	    FormLayout layout = new FormLayout("5dlu,pref:grow,5dlu","25dlu,pref,10dlu,15dlu");
+	    PanelBuilder builder = new PanelBuilder(layout);
+		
+	    JLabel label = new JLabel(s);
+	    builder.add(label, cc.xy(2, 2));
+	    builder.addSeparator("", cc.xyw(2, 4, 2));
+
+	    sidePanel.add(builder.getPanel(), BorderLayout.NORTH);
        	sidePanel.revalidate();
        	sidePanel.repaint();               
 	}
@@ -388,25 +296,17 @@ ApplicationEventListener {
 	 * @param e - current selection
 	 */
 	private void multiSelection(SelectionEvent e){
-        if(e.selection.size() == 1){
-        	
-        	//warning_flag = 0;
-        	Iterator<VPathwayElement> it = e.selection.iterator();
-        	sidePanelDisplayManager(it.next());
-        }
-        else if(e.selection.size() == 0) {
-        	//warning_flag = 1;
-        	emptyJComboBox(pluginList);
-        	goButton.setEnabled(false);
-        	cancelButton.setEnabled(false);
-        	displayMessage("No node selected.");
-        }
-        else{
-        	//warning_flag = 1;
-        	emptyJComboBox(pluginList);
-        	goButton.setEnabled(false);
-        	cancelButton.setEnabled(false);
-        	displayMessage("Warning: Multiple Elements Selected.");
+        if(e.selection.size() == 1) {
+        	if(registry.registeredPlugins.size() == 0) {
+        		displayMessage("No information provider plugins installed.");
+        	} else {
+        		// create side panel
+	        	sidePanelDisplayManager(e.selection.iterator().next());
+        	}
+        } else if(e.selection.size() == 0) {
+        	displayMessage("No pathway element is selected.");
+        } else {
+        	displayMessage("Warning: multiple elements are selected.");
         }
 	}
 	
@@ -416,15 +316,10 @@ ApplicationEventListener {
 	 * @return - returns true if annotated else false
 	 */
 	private Boolean isAnnotated(PathwayElement pe){
-	
-		if(pe.getXref().getDataSource() == null | 
-				pe.getXref().getId() == null){
+		if(pe.getXref().getDataSource() == null | pe.getXref().getId() == null){
 			return false;
-		}
-		else{
+		} else {
 			return true;	
 		}
-		
 	}
-
 }
