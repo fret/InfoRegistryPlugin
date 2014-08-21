@@ -15,6 +15,7 @@
 		<fileset dir="${pathvisio.dir}/lib">
 			<include name="org.bridgedb.jar"/>
 			<include name="org.eclipse.osgi.jar"/>
+			<include name="org.pathvisio.jgoodies.forms.jar"/>
 		</fileset>
 	</path>
 
