@@ -211,6 +211,14 @@ public class InfoRegistryPlugin extends JPanel implements Plugin, SelectionListe
 	    
 		final JComboBox pluginList = fillDropDown(pe.getDataNodeType(), provider);
 		
+		pluginList.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				lastSelected = pluginList.getSelectedItem();
+				
+			}
+		});
 	    FormLayout layout = new FormLayout("5dlu,pref:grow,5dlu", "5dlu,pref,5dlu,pref,5dlu,pref,15dlu");
 	    PanelBuilder builder = new PanelBuilder(layout);
 	     
